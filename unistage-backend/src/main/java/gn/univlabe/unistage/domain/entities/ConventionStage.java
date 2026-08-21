@@ -50,6 +50,25 @@ public class ConventionStage {
     @Column(name = "pdf_url")
     private String pdfUrl;
 
+    // ─── Signatures Tripartites ──────────────────────────────────────────────
+    @Column(name = "date_signature_etudiant")
+    private LocalDateTime dateSignatureEtudiant;
+
+    @Column(name = "signature_etudiant_url", columnDefinition = "TEXT")
+    private String signatureEtudiantUrl;
+
+    @Column(name = "date_signature_entreprise")
+    private LocalDateTime dateSignatureEntreprise;
+
+    @Column(name = "signature_entreprise_url", columnDefinition = "TEXT")
+    private String signatureEntrepriseUrl;
+
+    @Column(name = "date_signature_tuteur")
+    private LocalDateTime dateSignatureTuteur;
+
+    @Column(name = "signature_tuteur_url", columnDefinition = "TEXT")
+    private String signatureTuteurUrl;
+
     @Column(name = "date_creation", updatable = false)
     private LocalDateTime dateCreation;
 

@@ -90,6 +90,73 @@
       <!-- Left Column: Termes convention & Dépôts Rapport/Évaluation -->
       <div class="col-lg-8">
 
+        <!-- Card 0: Signatures Tripartites Status Box -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h4 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+              <span>✍️ Signatures &amp; Validations Tripartites</span>
+            </h4>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fw-bold">
+              3 Parties Contractantes
+            </span>
+          </div>
+
+          <div class="row g-3">
+            <!-- 1. Étudiant -->
+            <div class="col-md-4">
+              <div class="p-3 border rounded-3 text-center h-100" [ngClass]="isStepCompleted(1) ? 'bg-success-subtle border-success-subtle' : 'bg-light'">
+                <div class="fs-4 mb-1">🎓</div>
+                <div class="fw-bold text-dark small">1. Étudiant Stagiaire</div>
+                <div class="text-secondary small mb-2">{{ conv.candidature.etudiant.prenom }} {{ conv.candidature.etudiant.nom }}</div>
+                @if (conv.dateSignatureEtudiant || isStepCompleted(1)) {
+                  <span class="badge bg-success text-white px-2.5 py-1 rounded-pill mb-1">✅ SIGNÉ</span>
+                  <div class="small text-muted font-monospace" style="font-size: 0.72rem;">
+                    {{ (conv.dateSignatureEtudiant || conv.dateCreation) | date:'dd/MM/yyyy HH:mm' }}
+                  </div>
+                } @else {
+                  <span class="badge bg-secondary text-white px-2.5 py-1 rounded-pill mb-1">⏳ En attente</span>
+                }
+              </div>
+            </div>
+
+            <!-- 2. Entreprise -->
+            <div class="col-md-4">
+              <div class="p-3 border rounded-3 text-center h-100" [ngClass]="isStepCompleted(2) ? 'bg-primary-subtle border-primary-subtle' : 'bg-light'">
+                <div class="fs-4 mb-1">🏢</div>
+                <div class="fw-bold text-dark small">2. Entreprise Partner</div>
+                <div class="text-secondary small mb-2">{{ conv.candidature.offre.nomEntreprise }}</div>
+                @if (conv.dateSignatureEntreprise || isStepCompleted(2)) {
+                  <span class="badge bg-primary text-white px-2.5 py-1 rounded-pill mb-1">✅ CACHETÉ &amp; VALIDÉ</span>
+                  <div class="small text-muted font-monospace" style="font-size: 0.72rem;">
+                    {{ (conv.dateSignatureEntreprise || conv.dateCreation) | date:'dd/MM/yyyy HH:mm' }}
+                  </div>
+                } @else {
+                  <span class="badge bg-secondary text-white px-2.5 py-1 rounded-pill mb-1">⏳ En attente</span>
+                }
+              </div>
+            </div>
+
+            <!-- 3. Tuteur / Université -->
+            <div class="col-md-4">
+              <div class="p-3 border rounded-3 text-center h-100" [ngClass]="isStepCompleted(4) ? 'bg-info-subtle border-info-subtle' : 'bg-light'">
+                <div class="fs-4 mb-1">🏛️</div>
+                <div class="fw-bold text-dark small">3. Université de Labé</div>
+                <div class="text-secondary small mb-2">
+                  {{ conv.tuteur ? ('Prof. ' + conv.tuteur.prenom + ' ' + conv.tuteur.nom) : 'Tuteur non assigné' }}
+                </div>
+                @if (conv.dateSignatureTuteur || isStepCompleted(4)) {
+                  <span class="badge bg-dark text-white px-2.5 py-1 rounded-pill mb-1">✅ SIGNÉ &amp; SCEAU</span>
+                  <div class="small text-muted font-monospace" style="font-size: 0.72rem;">
+                    {{ (conv.dateSignatureTuteur || conv.dateCreation) | date:'dd/MM/yyyy HH:mm' }}
+                  </div>
+                } @else {
+                  <span class="badge bg-secondary text-white px-2.5 py-1 rounded-pill mb-1">⏳ En attente</span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Card 1: Form Termes & Missions -->
         <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
           <h4 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">

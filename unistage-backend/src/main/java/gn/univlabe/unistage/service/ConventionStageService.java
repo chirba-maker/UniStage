@@ -50,6 +50,10 @@ public class ConventionStageService {
         if (StatutConventionEnum.BROUILLON.equals(convention.getStatutValidation())) {
             convention.setStatutValidation(StatutConventionEnum.SOUMISE);
         }
+        if (convention.getDateSignatureEtudiant() == null) {
+            convention.setDateSignatureEtudiant(java.time.LocalDateTime.now());
+            convention.setSignatureEtudiantUrl("SIGNATURE_DIGITALE_ETUDIANT_OK");
+        }
 
         ConventionStage updated = conventionStageRepository.save(convention);
         auditConventionService.logAction(
@@ -81,6 +85,10 @@ public class ConventionStageService {
         }
 
         convention.setStatutValidation(StatutConventionEnum.VALIDEE_ENTREPRISE);
+        if (convention.getDateSignatureEntreprise() == null) {
+            convention.setDateSignatureEntreprise(java.time.LocalDateTime.now());
+            convention.setSignatureEntrepriseUrl("SIGNATURE_ET_CACHET_ENTREPRISE_OK");
+        }
         ConventionStage updated = conventionStageRepository.save(convention);
 
         auditConventionService.logAction(
@@ -160,8 +168,12 @@ public class ConventionStageService {
         }
 
         convention.setStatutValidation(StatutConventionEnum.SIGNEE_FINALE);
+        if (convention.getDateSignatureTuteur() == null) {
+            convention.setDateSignatureTuteur(java.time.LocalDateTime.now());
+            convention.setSignatureTuteurUrl("SIGNATURE_ET_SCEAU_UNIVERSITE_OK");
+        }
 
-        // 1. Generate PDF
+        // 1. Generate PDF (with all 3 signatures)
         byte[] pdfBytes = pdfGeneratorService.generateConventionPdf(convention);
 
         // 2. Save PDF file
@@ -274,6 +286,12 @@ public class ConventionStageService {
                 .gratification(conv.getGratification())
                 .statutValidation(conv.getStatutValidation())
                 .pdfUrl(conv.getPdfUrl())
+                .dateSignatureEtudiant(conv.getDateSignatureEtudiant())
+                .signatureEtudiantUrl(conv.getSignatureEtudiantUrl())
+                .dateSignatureEntreprise(conv.getDateSignatureEntreprise())
+                .signatureEntrepriseUrl(conv.getSignatureEntrepriseUrl())
+                .dateSignatureTuteur(conv.getDateSignatureTuteur())
+                .signatureTuteurUrl(conv.getSignatureTuteurUrl())
                 .dateCreation(conv.getDateCreation())
                 .build();
     }

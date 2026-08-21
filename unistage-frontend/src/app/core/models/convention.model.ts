@@ -28,6 +28,15 @@ export interface ConventionStage {
   gratification?: number;
   statutValidation: StatutConventionEnum;
   pdfUrl?: string;
+
+  // Signatures Tripartites
+  dateSignatureEtudiant?: string;
+  signatureEtudiantUrl?: string;
+  dateSignatureEntreprise?: string;
+  signatureEntrepriseUrl?: string;
+  dateSignatureTuteur?: string;
+  signatureTuteurUrl?: string;
+
   dateCreation: string;
 }
 

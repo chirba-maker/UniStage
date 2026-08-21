@@ -5,10 +5,12 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import gn.univlabe.unistage.domain.entities.ConventionStage;
+import gn.univlabe.unistage.domain.enums.StatutConventionEnum;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -89,24 +91,62 @@ public class PdfGeneratorService {
             Paragraph missionsTitle = new Paragraph("\nMissions confiées:", bodyBoldFont);
             document.add(missionsTitle);
             Paragraph missionsBody = new Paragraph(convention.getMissions(), bodyFont);
-            missionsBody.setSpacingAfter(25);
+            missionsBody.setSpacingAfter(20);
             document.add(missionsBody);
 
-            // Signatures Table
+            // Signatures Table (Tripartite Signatures & Seals)
             PdfPTable sigTable = new PdfPTable(3);
             sigTable.setWidthPercentage(100);
+            sigTable.setSpacingBefore(15);
 
-            PdfPCell sig1 = new PdfPCell(new Paragraph("Signature Étudiant\n\n\n__________________", bodyBoldFont));
-            sig1.setBorder(Rectangle.NO_BORDER);
-            sig1.setHorizontalAlignment(Element.ALIGN_CENTER);
+            DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-            PdfPCell sig2 = new PdfPCell(new Paragraph("Cachet & Signature Entreprise\n\n\n__________________", bodyBoldFont));
-            sig2.setBorder(Rectangle.NO_BORDER);
-            sig2.setHorizontalAlignment(Element.ALIGN_CENTER);
+            // Cell 1: Student Signature
+            PdfPCell sig1 = new PdfPCell();
+            sig1.setPadding(8);
+            sig1.setBackgroundColor(new Color(248, 250, 252));
+            sig1.addElement(new Paragraph("1. ÉTUDIANT STAGIAIRE", bodyBoldFont));
+            if (convention.getDateSignatureEtudiant() != null || convention.getStatutValidation() != StatutConventionEnum.BROUILLON) {
+                String dateEt = convention.getDateSignatureEtudiant() != null ? convention.getDateSignatureEtudiant().format(dtFormatter) : LocalDateTime.now().format(dtFormatter);
+                sig1.addElement(new Paragraph("✅ SIGNÉ NUMÉRIQUEMENT", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, new Color(39, 174, 96))));
+                sig1.addElement(new Paragraph("Nom: " + convention.getCandidature().getEtudiant().getPrenom() + " " + convention.getCandidature().getEtudiant().getNom(), bodyFont));
+                sig1.addElement(new Paragraph("Date: " + dateEt, bodyFont));
+                sig1.addElement(new Paragraph("Ref: UNISTAGE-SIG-ETU-" + convention.getId(), FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 7, Color.GRAY)));
+            } else {
+                sig1.addElement(new Paragraph("\n⏳ En attente de signature\n\n__________________", bodyFont));
+            }
 
-            PdfPCell sig3 = new PdfPCell(new Paragraph("Validation Université / Tuteur\n\n\n__________________", bodyBoldFont));
-            sig3.setBorder(Rectangle.NO_BORDER);
-            sig3.setHorizontalAlignment(Element.ALIGN_CENTER);
+            // Cell 2: Enterprise Signature & Stamp
+            PdfPCell sig2 = new PdfPCell();
+            sig2.setPadding(8);
+            sig2.setBackgroundColor(new Color(248, 250, 252));
+            sig2.addElement(new Paragraph("2. CACHET & ENTREPRISE", bodyBoldFont));
+            if (convention.getDateSignatureEntreprise() != null || convention.getStatutValidation() == StatutConventionEnum.VALIDEE_ENTREPRISE || convention.getStatutValidation() == StatutConventionEnum.VALIDEE_TUTEUR || convention.getStatutValidation() == StatutConventionEnum.SIGNEE_FINALE) {
+                String dateEnt = convention.getDateSignatureEntreprise() != null ? convention.getDateSignatureEntreprise().format(dtFormatter) : LocalDateTime.now().format(dtFormatter);
+                sig2.addElement(new Paragraph("✅ CACHETÉ & VALIDÉ", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, new Color(41, 128, 185))));
+                sig2.addElement(new Paragraph("Sté: " + convention.getCandidature().getOffre().getEntreprise().getNomEntreprise(), bodyFont));
+                sig2.addElement(new Paragraph("Date: " + dateEnt, bodyFont));
+                sig2.addElement(new Paragraph("Ref: UNISTAGE-STAMP-ENT-" + convention.getId(), FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 7, Color.GRAY)));
+            } else {
+                sig2.addElement(new Paragraph("\n⏳ En attente de validation\n\n__________________", bodyFont));
+            }
+
+            // Cell 3: University / Tutor Validation & Official Seal
+            PdfPCell sig3 = new PdfPCell();
+            sig3.setPadding(8);
+            sig3.setBackgroundColor(new Color(248, 250, 252));
+            sig3.addElement(new Paragraph("3. SCEAU UNIVERSITÉ DE LABÉ", bodyBoldFont));
+            if (convention.getDateSignatureTuteur() != null || convention.getStatutValidation() == StatutConventionEnum.SIGNEE_FINALE) {
+                String dateTut = convention.getDateSignatureTuteur() != null ? convention.getDateSignatureTuteur().format(dtFormatter) : LocalDateTime.now().format(dtFormatter);
+                sig3.addElement(new Paragraph("✅ APPROUBÉ & SIGNÉ FINALE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, new Color(142, 68, 173))));
+                if (convention.getTuteur() != null) {
+                    sig3.addElement(new Paragraph("Tuteur: Prof. " + convention.getTuteur().getPrenom() + " " + convention.getTuteur().getNom(), bodyFont));
+                }
+                sig3.addElement(new Paragraph("Date: " + dateTut, bodyFont));
+                sig3.addElement(new Paragraph("Sceau: REPUBLIQUE DE GUINÉE - LABÉ", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, new Color(192, 57, 43))));
+            } else {
+                sig3.addElement(new Paragraph("\n⏳ En attente de validation tuteur\n\n__________________", bodyFont));
+            }
 
             sigTable.addCell(sig1);
             sigTable.addCell(sig2);

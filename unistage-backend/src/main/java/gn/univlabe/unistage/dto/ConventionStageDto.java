@@ -24,5 +24,14 @@ public class ConventionStageDto {
     private BigDecimal gratification;
     private StatutConventionEnum statutValidation;
     private String pdfUrl;
+
+    // Signatures Tripartites
+    private LocalDateTime dateSignatureEtudiant;
+    private String signatureEtudiantUrl;
+    private LocalDateTime dateSignatureEntreprise;
+    private String signatureEntrepriseUrl;
+    private LocalDateTime dateSignatureTuteur;
+    private String signatureTuteurUrl;
+
     private LocalDateTime dateCreation;
 }
