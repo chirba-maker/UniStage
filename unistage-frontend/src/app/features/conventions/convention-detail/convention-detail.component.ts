@@ -266,11 +266,11 @@ export class ConventionDetailComponent implements OnInit {
 
   getRoleBadgeClass(role?: string): string {
     switch (role) {
-      case 'ROLE_ETUDIANT': return 'bg-purple-600/20 text-purple-400 border-purple-500/30';
-      case 'ROLE_ENTREPRISE': return 'bg-blue-600/20 text-blue-400 border-blue-500/30';
-      case 'ROLE_TUTEUR': return 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30';
-      case 'ROLE_ADMIN': return 'bg-amber-600/20 text-amber-400 border-amber-500/30';
-      default: return 'bg-slate-700 text-slate-300';
+      case 'ROLE_ETUDIANT': return 'bg-info text-dark fw-bold';
+      case 'ROLE_ENTREPRISE': return 'bg-primary text-white fw-bold';
+      case 'ROLE_TUTEUR': return 'bg-success text-white fw-bold';
+      case 'ROLE_ADMIN': return 'bg-danger text-white fw-bold';
+      default: return 'bg-secondary text-white fw-bold';
     }
   }
 }

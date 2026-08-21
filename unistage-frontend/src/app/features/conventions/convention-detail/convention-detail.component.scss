@@ -1,4 +1,62 @@
-// Styles spécifiques pour le visualiseur et la timeline d'audit de la convention
+/* ═══ CONVENTION DETAIL PAGE STYLES ═══ */
+
+/* Stepper styles */
+.stepper-bar {
+  .step-item {
+    opacity: 0.5;
+    transition: all 0.25s ease;
+
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+
+    .step-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .step-sub {
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+
+    &.step-completed {
+      opacity: 1;
+
+      .step-circle {
+        background: #10b981;
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+      }
+
+      .step-title {
+        color: #0f172a;
+      }
+    }
+  }
+}
+
+/* Timeline styles */
+.audit-timeline {
+  .timeline-item:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.25s ease-out forwards;
 }
