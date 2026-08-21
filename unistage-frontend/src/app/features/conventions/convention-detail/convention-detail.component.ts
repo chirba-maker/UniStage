@@ -98,12 +98,22 @@ export class ConventionDetailComponent implements OnInit {
 
   openConventionPdfPreview(): void {
     if (!this.convention()) return;
-    const convId = this.convention()!.id;
-    this.pdfModalTitle.set(`Convention de Stage N° ${convId}`);
+    const conv = this.convention()!;
+    this.pdfModalTitle.set(`Convention de Stage N° ${conv.id}`);
     this.loadingPdf.set(true);
     this.isPdfModalOpen.set(true);
 
-    this.conventionService.getPreviewPdf(convId).subscribe({
+    // Si le PDF officiel a déjà été généré et stocké sur le serveur
+    if (conv.pdfUrl) {
+      const fullUrl = this.conventionService.getFileUrl(conv.pdfUrl);
+      this.pdfModalUrl.set(fullUrl);
+      this.pdfModalBlob.set(null);
+      this.loadingPdf.set(false);
+      return;
+    }
+
+    // Sinon, génération dynamique de la prévisualisation PDF
+    this.conventionService.getPreviewPdf(conv.id).subscribe({
       next: (blob) => {
         this.pdfModalBlob.set(blob);
         this.pdfModalUrl.set(null);
