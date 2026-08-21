@@ -976,20 +976,27 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   getActionBadgeClass(action?: string): string {
-    if (!action) return 'bg-secondary-subtle text-secondary';
-    // Connexions
-    if (action.includes('CONNEXION') || action.includes('INSCRIPTION')) return 'bg-info-subtle text-info border border-info-subtle';
-    // Offres
-    if (action.includes('OFFRE')) return 'bg-primary-subtle text-primary border border-primary-subtle';
+    if (!action) return 'bg-secondary text-white';
+    // Connexions & Inscriptions
+    if (action.includes('CONNEXION') || action.includes('INSCRIPTION')) return 'bg-info text-dark fw-bold px-2 py-1';
+    // Enterprise Validation
+    if (action === 'ENTREPRISE_VALIDEE' || action.includes('VALIDEE')) return 'bg-success text-white fw-bold px-2 py-1';
+    // Enterprise Deactivation
+    if (action === 'ENTREPRISE_DESACTIVEE' || action.includes('DESACTIVEE')) return 'bg-danger text-white fw-bold px-2 py-1';
+    // Offre Publiée
+    if (action === 'OFFRE_PUBLIEE' || action.includes('PUBLIEE')) return 'bg-success text-white fw-bold px-2 py-1';
+    // Offre Rejetée
+    if (action === 'OFFRE_REJETEE' || action.includes('REJETEE')) return 'bg-danger text-white fw-bold px-2 py-1';
+    // Offres en général
+    if (action.includes('OFFRE')) return 'bg-primary text-white fw-bold px-2 py-1';
     // Candidatures
-    if (action.includes('CANDIDATURE')) return 'bg-warning-subtle text-warning border border-warning-subtle';
-    // Conventions
-    if (action.includes('CONVENTION') || action.includes('TUTEUR') || action.includes('SIGNATURE')) return 'bg-success-subtle text-success border border-success-subtle';
-    // Entreprises/Validation
-    if (action.includes('ENTREPRISE') || action.includes('VALIDE')) return 'bg-violet-subtle text-purple border border-purple-subtle';
+    if (action.includes('CANDIDATURE')) return 'bg-warning text-dark fw-bold px-2 py-1';
+    // Conventions & Tuteurs & Signatures
+    if (action.includes('CONVENTION') || action.includes('TUTEUR') || action.includes('SIGNATURE')) return 'bg-success text-white fw-bold px-2 py-1';
     // Erreurs
-    if (action.includes('ERREUR') || action.includes('ERROR')) return 'bg-danger-subtle text-danger border border-danger-subtle';
-    return 'bg-dark-subtle text-dark border';
+    if (action.includes('ERREUR') || action.includes('ERROR')) return 'bg-danger text-white fw-bold px-2 py-1';
+
+    return 'bg-dark text-white fw-bold px-2 py-1';
   }
 
   getSignedConventionsCount(): number {

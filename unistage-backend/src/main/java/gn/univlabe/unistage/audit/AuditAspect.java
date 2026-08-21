@@ -1,6 +1,8 @@
 package gn.univlabe.unistage.audit;
 
 import gn.univlabe.unistage.domain.entities.User;
+import gn.univlabe.unistage.domain.enums.StatutOffreEnum;
+import gn.univlabe.unistage.repository.UserRepository;
 import gn.univlabe.unistage.service.SystemAuditLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +24,6 @@ import java.util.stream.Collectors;
 /**
  * Aspect AOP qui intercepte toutes les méthodes annotées avec {@link AuditAction}
  * et enregistre automatiquement l'action dans le journal d'audit système.
- *
- * <p><b>Fonctionnement :</b>
- * <ol>
- *   <li>Récupère l'utilisateur connecté depuis le {@code SecurityContext}</li>
- *   <li>Extrait l'adresse IP de la requête HTTP</li>
- *   <li>Exécute la méthode métier normalement</li>
- *   <li>En cas de succès → log SUCCESS asynchrone</li>
- *   <li>En cas d'exception → log ERROR asynchrone (si auditErrors=true)</li>
- * </ol>
- * </p>
  */
 @Aspect
 @Component
@@ -40,6 +32,7 @@ import java.util.stream.Collectors;
 public class AuditAspect {
 
     private final SystemAuditLogService systemAuditLogService;
+    private final UserRepository userRepository;
 
     /**
      * Intercepte toutes les méthodes annotées {@literal @}AuditAction dans le package service.
@@ -54,14 +47,18 @@ public class AuditAspect {
         Long utilisateurId = null;
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof User currentUser) {
-            utilisateurId = currentUser.getId();
-            emailUtilisateur = currentUser.getEmail();
-            roleUtilisateur = currentUser.getRole().name();
-            // Nom affiché : nomComplet si dispo, sinon email
-            nomUtilisateur = (currentUser.getNomComplet() != null && !currentUser.getNomComplet().isBlank())
-                    ? currentUser.getNomComplet()
-                    : currentUser.getEmail();
+        if (auth != null && auth.isAuthenticated() && auth.getName() != null && !"anonymousUser".equals(auth.getName())) {
+            String email = auth.getName();
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isPresent()) {
+                User currentUser = userOpt.get();
+                utilisateurId = currentUser.getId();
+                emailUtilisateur = currentUser.getEmail();
+                roleUtilisateur = currentUser.getRole().name();
+                nomUtilisateur = (currentUser.getNomComplet() != null && !currentUser.getNomComplet().isBlank())
+                        ? currentUser.getNomComplet()
+                        : currentUser.getEmail();
+            }
         }
 
         // ── 2. Extraire l'IP de la requête HTTP ──────────────────────────────
@@ -72,7 +69,37 @@ public class AuditAspect {
         String entite = auditAction.entite();
         String detailsTemplate = auditAction.details();
 
-        // Enrichir les détails avec les paramètres de la méthode si disponibles
+        // Dynamique : Ajuster action & détails pour la validation/désactivation entreprise
+        if ("ENTREPRISE_VALIDEE".equals(action)) {
+            for (Object arg : joinPoint.getArgs()) {
+                if (arg instanceof Boolean b) {
+                    if (Boolean.FALSE.equals(b)) {
+                        action = "ENTREPRISE_DESACTIVEE";
+                        detailsTemplate = "Désactivation du compte entreprise par l'administration";
+                    } else {
+                        action = "ENTREPRISE_VALIDEE";
+                        detailsTemplate = "Approbation et validation du compte entreprise par l'administration";
+                    }
+                }
+            }
+        }
+
+        // Dynamique : Ajuster action & détails pour la modération d'offre (PUBLIEE / REJETEE)
+        if ("OFFRE_MODEREE".equals(action)) {
+            for (Object arg : joinPoint.getArgs()) {
+                if (arg instanceof StatutOffreEnum statut) {
+                    if (statut == StatutOffreEnum.PUBLIEE) {
+                        action = "OFFRE_PUBLIEE";
+                        detailsTemplate = "Approbation et publication de l'offre de stage par l'administration";
+                    } else if (statut == StatutOffreEnum.REJETEE) {
+                        action = "OFFRE_REJETEE";
+                        detailsTemplate = "Rejet de l'offre de stage lors de la modération par l'administration";
+                    }
+                }
+            }
+        }
+
+        // Enrichir les détails avec les paramètres si nécessaires
         String details = buildDetails(detailsTemplate, joinPoint, nomUtilisateur);
 
         // ── 4. Exécuter la méthode métier ─────────────────────────────────────
@@ -123,9 +150,6 @@ public class AuditAspect {
 
     // ─── Helpers privés ──────────────────────────────────────────────────────
 
-    /**
-     * Extrait l'adresse IP réelle de la requête HTTP en tenant compte des proxies.
-     */
     private String extractIpAddress() {
         try {
             ServletRequestAttributes attrs =
@@ -133,29 +157,21 @@ public class AuditAspect {
             if (attrs == null) return "N/A";
 
             HttpServletRequest request = attrs.getRequest();
-
-            // Ordre de priorité : X-Forwarded-For → X-Real-IP → remoteAddr
             String[] ipHeaders = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP", "WL-Proxy-Client-IP"};
             for (String header : ipHeaders) {
                 String ip = request.getHeader(header);
                 if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-                    // X-Forwarded-For peut contenir plusieurs IPs → prendre la première
                     return ip.split(",")[0].trim();
                 }
             }
             return request.getRemoteAddr();
-
         } catch (Exception e) {
             return "N/A";
         }
     }
 
-    /**
-     * Construit un message de détail enrichi à partir du template et des paramètres de la méthode.
-     */
     private String buildDetails(String template, ProceedingJoinPoint joinPoint, String nomUtilisateur) {
         if (template == null || template.isBlank()) {
-            // Générer un résumé automatique depuis les paramètres
             String params = Arrays.stream(joinPoint.getArgs())
                     .filter(arg -> arg != null && !(arg instanceof User))
                     .map(arg -> {
@@ -172,25 +188,18 @@ public class AuditAspect {
         return template;
     }
 
-    /**
-     * Tente d'extraire l'ID de l'entité depuis le résultat de la méthode ou les arguments.
-     */
     private Long extractEntityId(Object result, ProceedingJoinPoint joinPoint) {
-        // Essai 1 : si le résultat a une méthode getId()
         if (result != null) {
             try {
                 Method getIdMethod = result.getClass().getMethod("getId");
                 Object id = getIdMethod.invoke(result);
                 if (id instanceof Long l) return l;
                 if (id instanceof Integer i) return i.longValue();
-            } catch (Exception ignored) { /* pas de getId sur le résultat */ }
+            } catch (Exception ignored) {}
         }
-
-        // Essai 2 : premier argument Long (souvent l'ID de l'entité)
         for (Object arg : joinPoint.getArgs()) {
             if (arg instanceof Long l && l > 0) return l;
         }
-
         return null;
     }
 }

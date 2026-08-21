@@ -178,7 +178,7 @@ import { OffreStage } from '../../../core/models/offre.model';
               <div class="card-top-row">
                 <div class="company-brand">
                   <div class="company-logo-badge" [ngStyle]="{'background': getCompanyGradient(offre.nomEntreprise)}">
-                    {{ offre.nomEntreprise?.charAt(0) || '🏢' }}
+                    {{ (offre.nomEntreprise || '🏢').charAt(0) }}
                   </div>
                   <div class="company-text">
                     <span class="company-name-tag">{{ offre.nomEntreprise }}</span>
