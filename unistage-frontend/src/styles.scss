@@ -1,0 +1,272 @@
+/* ============================================================
+   UniStage — Design System Global
+   Palette: Slate dark + Blue accent + Clean white light mode
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap');
+
+/* ── CSS Custom Properties ── */
+:root {
+  /* Brand */
+  --primary:        #2563eb;
+  --primary-hover:  #1d4ed8;
+  --primary-light:  #eff6ff;
+  --primary-glow:   rgba(37, 99, 235, 0.15);
+
+  --accent:         #0ea5e9;
+  --success:        #10b981;
+  --success-light:  #ecfdf5;
+  --warning:        #f59e0b;
+  --warning-light:  #fffbeb;
+  --danger:         #ef4444;
+  --danger-light:   #fef2f2;
+
+  /* Neutrals */
+  --gray-50:   #f8fafc;
+  --gray-100:  #f1f5f9;
+  --gray-200:  #e2e8f0;
+  --gray-300:  #cbd5e1;
+  --gray-400:  #94a3b8;
+  --gray-500:  #64748b;
+  --gray-600:  #475569;
+  --gray-700:  #334155;
+  --gray-800:  #1e293b;
+  --gray-900:  #0f172a;
+
+  /* Typography */
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Sora', 'Inter', sans-serif;
+
+  /* Shadows */
+  --shadow-xs:   0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg:   0 10px 15px rgba(0,0,0,0.07), 0 4px 6px rgba(0,0,0,0.05);
+  --shadow-xl:   0 20px 25px rgba(0,0,0,0.08), 0 8px 10px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-blue: 0 4px 20px rgba(37,99,235,0.25);
+
+  /* Radii */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-pill: 9999px;
+
+  /* Transitions */
+  --ease:        cubic-bezier(0.4, 0, 0.2, 1);
+  --transition:  0.2s var(--ease);
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--gray-800);
+  background-color: var(--gray-50);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--gray-900);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover { color: var(--primary-hover); }
+
+img { display: block; max-width: 100%; }
+
+button, [role="button"] { cursor: pointer; }
+
+/* ── Layout ── */
+.page-wrapper {
+  min-height: calc(100vh - 68px);
+  background: var(--gray-50);
+}
+
+.container-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Utility classes ── */
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.01em;
+}
+
+.badge-blue   { background: var(--primary-light);  color: var(--primary);  }
+.badge-green  { background: var(--success-light);  color: var(--success);  }
+.badge-orange { background: var(--warning-light);  color: #b45309;          }
+.badge-gray   { background: var(--gray-100);       color: var(--gray-600);  }
+.badge-red    { background: var(--danger-light);   color: var(--danger);   }
+
+/* ── Cards ── */
+.card-uni {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition), box-shadow var(--transition);
+  overflow: hidden;
+}
+
+.card-uni:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gray-300);
+}
+
+/* ── Buttons ── */
+.btn-uni {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(37,99,235,0.3);
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-blue);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-outline:hover {
+  background: var(--primary-light);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--gray-600);
+  border: 1.5px solid var(--gray-200);
+}
+.btn-ghost:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-300);
+  color: var(--gray-800);
+}
+
+/* ── Form Inputs ── */
+.input-uni {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--gray-800);
+  background: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+.input-uni:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.input-uni::placeholder { color: var(--gray-400); }
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--gray-200);
+  border: none;
+  margin: 0;
+}
+
+/* ── Spinner ── */
+.spinner-uni {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--gray-500);
+}
+.empty-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+.empty-state p { font-size: 1rem; }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeUp 0.4s var(--ease) both;
+}
+.fade-up-delay-1 { animation-delay: 0.05s; }
+.fade-up-delay-2 { animation-delay: 0.10s; }
+.fade-up-delay-3 { animation-delay: 0.15s; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--gray-100); }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: var(--radius-pill); }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ── Bootstrap Overrides ── */
+.container { max-width: 1200px; }
+
+/* Fix Bootstrap dark classes conflict */
+.text-dark { color: var(--gray-900) !important; }
+.bg-light   { background-color: var(--gray-50) !important; }

@@ -1,0 +1,454 @@
+{
+	"info": {
+		"_postman_id": "unistage-api-labe-2026",
+		"name": "UniStage API — Université de Labé",
+		"description": "Collection complète des requêtes API REST pour la plateforme UniStage (Licence 3 Informatique).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentification",
+			"item": [
+				{
+					"name": "Connexion Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@univ-labe.edu.gn\",\n  \"password\": \"Test1234!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Connexion Étudiant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"mamadou.barry@etud.univ-labe.edu.gn\",\n  \"password\": \"Test1234!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Connexion Entreprise",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"contact@sotelgui.gn\",\n  \"password\": \"Test1234!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Inscription Étudiant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"fatoumata.diallo@etud.univ-labe.edu.gn\",\n  \"password\": \"Test1234!\",\n  \"nom\": \"Diallo\",\n  \"prenom\": \"Fatoumata\",\n  \"matricule\": \"ETUD202609\",\n  \"filiere\": \"Génie Informatique\",\n  \"niveau\": \"Licence 3\",\n  \"telephone\": \"+224620000000\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/etudiant",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								"etudiant"
+							]
+						}
+					}
+				},
+				{
+					"name": "Inscription Entreprise",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"rh@orange-guinee.gn\",\n  \"password\": \"Test1234!\",\n  \"nom\": \"Diallo\",\n  \"prenom\": \"Ibrahima\",\n  \"raisonSociale\": \"Orange Guinée\",\n  \"secteurActivite\": \"Télécommunications\",\n  \"adresse\": \"Conakry, Guinée\",\n  \"siteWeb\": \"https://orange-guinee.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/entreprise",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								"entreprise"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Offres de Stage",
+			"item": [
+				{
+					"name": "Lister les offres (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/offres?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"offres"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Détail d'une offre (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/offres/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"offres",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Créer une offre (Entreprise)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titre\": \"Stagiaire Développeur Java / Spring Boot\",\n  \"description\": \"Développement de modules backend et API REST pour les services télécoms.\",\n  \"competencesRequises\": \"Java, Spring Boot, MySQL, REST API\",\n  \"dateDebut\": \"2026-09-01\",\n  \"dateFin\": \"2026-12-01\",\n  \"lieu\": \"Labé / Télé-travail partiel\",\n  \"remuneration\": \"1500000 GNF\",\n  \"nombrePostes\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/offres",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"offres"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Candidatures",
+			"item": [
+				{
+					"name": "Postuler à une offre (Étudiant)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"offreId\": 1,\n  \"lettreMotivation\": \"Madame, Monsieur, passionné par le développement d'applications d'envergure, je sollicite un stage de perfectionnement...\",\n  \"cvPath\": \"/uploads/cv-mamadou-barry.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/candidatures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"candidatures"
+							]
+						}
+					}
+				},
+				{
+					"name": "Mes candidatures (Étudiant)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/candidatures/mes-candidatures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"candidatures",
+								"mes-candidatures"
+							]
+						}
+					}
+				},
+				{
+					"name": "Accepter / Rejeter une candidature (Entreprise)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"statut\": \"ACCEPTEE\",\n  \"commentaire\": \"Candidature retenue après évaluation du profil.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/candidatures/1/statut",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"candidatures",
+								"1",
+								"statut"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Administration & Super-Dashboard",
+			"item": [
+				{
+					"name": "Statistiques Globales Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/statistiques",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"statistiques"
+							]
+						}
+					}
+				},
+				{
+					"name": "Valider un compte Entreprise",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/entreprises/1/valider",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"entreprises",
+								"1",
+								"valider"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Conventions & PDF Tripartite",
+			"item": [
+				{
+					"name": "Lister les conventions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conventions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conventions"
+							]
+						}
+					}
+				},
+				{
+					"name": "Télécharger le PDF tripartite officiel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conventions/1/pdf",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conventions",
+								"1",
+								"pdf"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,420 @@
+@if (convention(); as conv) {
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Top Navigation -->
+    <div class="mb-6 flex items-center justify-between">
+      <a routerLink="/conventions/mes-conventions" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-medium transition border border-slate-700">
+        <span>← Retour à mes conventions</span>
+      </a>
+
+      <!-- Quick PDF Preview Trigger -->
+      <button 
+        (click)="openConventionPdfPreview()"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-blue-500/25 transition-all">
+        <span>👁️ Prévisualiser la Convention PDF</span>
+      </button>
+    </div>
+
+    <!-- Header Card -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 mb-8 shadow-xl relative overflow-hidden">
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative z-10">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-3">
+            Convention Tripartite N° {{ conv.id }}
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+            Stage : {{ conv.candidature.offre.titre }}
+          </h1>
+          <p class="text-sm text-slate-400 flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>🏢 <strong>Entreprise :</strong> {{ conv.candidature.offre.nomEntreprise }}</span>
+            <span>🎓 <strong>Étudiant :</strong> {{ conv.candidature.etudiant.prenom }} {{ conv.candidature.etudiant.nom }}</span>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span class="px-4 py-2 rounded-xl text-sm font-bold shadow-sm" [ngClass]="getStatutBadgeClass(conv.statutValidation)">
+            {{ conv.statutValidation }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Stepper -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-slate-800/80">
+        <div class="flex items-center gap-3" [class.opacity-50]="!isStepCompleted(1)">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+            [class.bg-emerald-500]="isStepCompleted(1)" [class.text-slate-950]="isStepCompleted(1)"
+            [class.bg-slate-800]="!isStepCompleted(1)" [class.text-slate-400]="!isStepCompleted(1)">
+            1
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-300">Étape 1</div>
+            <div class="text-xs text-slate-500">Initialisation</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3" [class.opacity-50]="!isStepCompleted(2)">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+            [class.bg-emerald-500]="isStepCompleted(2)" [class.text-slate-950]="isStepCompleted(2)"
+            [class.bg-slate-800]="!isStepCompleted(2)" [class.text-slate-400]="!isStepCompleted(2)">
+            2
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-300">Étape 2</div>
+            <div class="text-xs text-slate-500">Val. Entreprise</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3" [class.opacity-50]="!isStepCompleted(3)">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+            [class.bg-emerald-500]="isStepCompleted(3)" [class.text-slate-950]="isStepCompleted(3)"
+            [class.bg-slate-800]="!isStepCompleted(3)" [class.text-slate-400]="!isStepCompleted(3)">
+            3
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-300">Étape 3</div>
+            <div class="text-xs text-slate-500">Val. Tuteur</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3" [class.opacity-50]="!isStepCompleted(4)">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+            [class.bg-emerald-500]="isStepCompleted(4)" [class.text-slate-950]="isStepCompleted(4)"
+            [class.bg-slate-800]="!isStepCompleted(4)" [class.text-slate-400]="!isStepCompleted(4)">
+            4
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-300">Étape 4</div>
+            <div class="text-xs text-slate-500">Signature PDF</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Left 2 columns: Termes convention & Dépôts Rapport/Évaluation -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Form Termes & Missions -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <span>📋 Termes et Informations du Stage</span>
+          </h2>
+
+          <form (ngSubmit)="onSaveDetails()" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Date de début *</label>
+                <input 
+                  type="date" 
+                  [(ngModel)]="editForm.dateDebut" 
+                  name="dateDebut" 
+                  [disabled]="isFinalSigned()"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Date de fin *</label>
+                <input 
+                  type="date" 
+                  [(ngModel)]="editForm.dateFin" 
+                  name="dateFin" 
+                  [disabled]="isFinalSigned()"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Gratification mensuelle (GNF)</label>
+              <input 
+                type="number" 
+                [(ngModel)]="editForm.gratification" 
+                name="gratification" 
+                [disabled]="isFinalSigned()"
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Missions confiées *</label>
+              <textarea 
+                rows="4" 
+                [(ngModel)]="editForm.missions" 
+                name="missions" 
+                [disabled]="isFinalSigned()"
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50"></textarea>
+            </div>
+
+            @if (!isFinalSigned()) {
+              <div class="flex justify-end pt-2">
+                <button 
+                  type="submit" 
+                  [disabled]="saving()"
+                  class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition shadow-lg shadow-blue-600/30 disabled:opacity-50">
+                  <span>💾 Enregistrer les termes</span>
+                </button>
+              </div>
+            }
+          </form>
+        </div>
+
+        <!-- MODULE ÉTAPE 4.3 : Rapport de stage & Fiche d'évaluation -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-8">
+          <div>
+            <h2 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <span>🎓 Évaluation & Rapport de Fin de Stage</span>
+            </h2>
+            <p class="text-xs text-slate-400">Module de gestion des livrables de fin de stage (Rapport étudiant & Fiche d'évaluation du tuteur académique).</p>
+          </div>
+
+          <!-- Section Rapport Déposé / Formulaire de Dépôt -->
+          <div class="p-6 bg-slate-950/60 border border-slate-800 rounded-2xl">
+            <h3 class="text-base font-bold text-slate-200 mb-4 flex items-center justify-between">
+              <span>📄 Rapport de Stage (Étudiant)</span>
+              @if (rapportStage(); as rap) {
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  Déposé le {{ rap.dateDepot | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+              } @else {
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  En attente de dépôt
+                </span>
+              }
+            </h3>
+
+            @if (rapportStage(); as rap) {
+              <div class="space-y-3">
+                <div class="text-sm font-semibold text-slate-100">{{ rap.titre }}</div>
+                @if (rap.resume) {
+                  <p class="text-xs text-slate-400 bg-slate-900 p-3 rounded-xl border border-slate-800">{{ rap.resume }}</p>
+                }
+                <div class="pt-2">
+                  <button 
+                    (click)="openDocumentUrlPreview('Rapport de Stage : ' + rap.titre, rap.fichierUrl)"
+                    class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-400 font-medium text-xs transition border border-slate-700 flex items-center gap-2">
+                    <span>👁️ Aperçu du Rapport PDF</span>
+                  </button>
+                </div>
+              </div>
+            } @else if (isEtudiant()) {
+              <!-- Form Dépôt Étudiant -->
+              <form (ngSubmit)="onSubmitRapport()" class="space-y-4 pt-2">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Titre du rapport *</label>
+                  <input type="text" [(ngModel)]="rapportForm.titre" name="rapportTitre" placeholder="Ex: Rapport de stage - Développement d'application Web" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" required />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Résumé / Synthèse</label>
+                  <textarea rows="2" [(ngModel)]="rapportForm.resume" name="rapportResume" placeholder="Résumé succinct de vos travaux et apprentissages..." class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Fichier PDF du rapport *</label>
+                  <input type="file" (change)="onRapportFileSelected($event)" accept="application/pdf" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500" required />
+                </div>
+                <button type="submit" [disabled]="submittingRapport() || !selectedRapportFile || !rapportForm.titre" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow-md shadow-emerald-600/30 disabled:opacity-50">
+                  <span>🚀 Déposer mon Rapport</span>
+                </button>
+              </form>
+            } @else {
+              <p class="text-xs text-slate-500 italic">L'étudiant n'a pas encore déposé son rapport de stage.</p>
+            }
+          </div>
+
+          <!-- Section Évaluation Tuteur -->
+          <div class="p-6 bg-slate-950/60 border border-slate-800 rounded-2xl">
+            <h3 class="text-base font-bold text-slate-200 mb-4 flex items-center justify-between">
+              <span>📝 Fiche d'Évaluation (Tuteur Académique)</span>
+              @if (evaluationTuteur(); as ev) {
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                  Note Globale : {{ ev.noteGlobale }}/20
+                </span>
+              } @else {
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                  Non Évalué
+                </span>
+              }
+            </h3>
+
+            @if (evaluationTuteur(); as ev) {
+              <div class="space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                  <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400">Qualité Travail</div>
+                    <div class="text-base font-extrabold text-blue-400">{{ ev.noteQualiteTravail }}/20</div>
+                  </div>
+                  <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400">Autonomie</div>
+                    <div class="text-base font-extrabold text-indigo-400">{{ ev.noteAutonomie }}/20</div>
+                  </div>
+                  <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400">Assiduité</div>
+                    <div class="text-base font-extrabold text-purple-400">{{ ev.noteAssiduite }}/20</div>
+                  </div>
+                  <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400">Intégration</div>
+                    <div class="text-base font-extrabold text-emerald-400">{{ ev.noteIntegration }}/20</div>
+                  </div>
+                </div>
+
+                @if (ev.appreciationGlobale) {
+                  <div>
+                    <div class="text-xs font-semibold text-slate-400 mb-1">Appréciation générale :</div>
+                    <p class="text-xs text-slate-300 bg-slate-900 p-3 rounded-xl border border-slate-800 italic">"{{ ev.appreciationGlobale }}"</p>
+                  </div>
+                }
+
+                @if (ev.fichierEvaluationUrl) {
+                  <div>
+                    <button 
+                      (click)="openDocumentUrlPreview('Fiche d\'évaluation Tuteur', ev.fichierEvaluationUrl!)"
+                      class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-medium text-xs transition border border-slate-700 flex items-center gap-2">
+                      <span>👁️ Aperçu Fiche d'Évaluation PDF</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else if (isTuteur()) {
+              <!-- Form Évaluation Tuteur -->
+              <form (ngSubmit)="onSubmitEvaluation()" class="space-y-4 pt-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Qualité du travail (/20)</label>
+                    <input type="number" min="0" max="20" [(ngModel)]="evalForm.noteQualiteTravail" name="noteQualite" class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Autonomie (/20)</label>
+                    <input type="number" min="0" max="20" [(ngModel)]="evalForm.noteAutonomie" name="noteAutonomie" class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Assiduité & Ponctualité (/20)</label>
+                    <input type="number" min="0" max="20" [(ngModel)]="evalForm.noteAssiduite" name="noteAssiduite" class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Intégration d'équipe (/20)</label>
+                    <input type="number" min="0" max="20" [(ngModel)]="evalForm.noteIntegration" name="noteIntegration" class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Appréciation globale & Remarques</label>
+                  <textarea rows="3" [(ngModel)]="evalForm.appreciationGlobale" name="appreciation" placeholder="Commentaires académiques sur la conduite et les réalisations du stagiaire..." class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 mb-1">Fiche signée scannée (Optionnel, PDF)</label>
+                  <input type="file" (change)="onEvalFileSelected($event)" accept="application/pdf" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500" />
+                </div>
+
+                <button type="submit" [disabled]="submittingEval()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-md shadow-indigo-600/30 disabled:opacity-50">
+                  <span>✅ Enregistrer l'Évaluation</span>
+                </button>
+              </form>
+            } @else {
+              <p class="text-xs text-slate-500 italic">Le tuteur académique n'a pas encore rempli la fiche d'évaluation.</p>
+            }
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right 1 column: Actions & Audit Log Timeline (Étape 4.2) -->
+      <div class="space-y-8">
+        
+        <!-- Workflow Actions Box -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+          <h2 class="text-lg font-bold text-white mb-4">⚡ Actions Workflow</h2>
+
+          @if (conv.statutValidation === 'SIGNEE_FINALE') {
+            <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-center space-y-3 mb-4">
+              <div class="text-sm font-bold text-emerald-400">🎉 Convention Signée Officielle !</div>
+              <p class="text-xs text-slate-400">Document tripartite validé avec signature numérique.</p>
+              <a [href]="getPdfDownloadUrl()" class="block w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/30 transition">
+                📥 Télécharger le PDF Officiel
+              </a>
+            </div>
+          }
+
+          <div class="space-y-3">
+            @if (isEntreprise() && conv.statutValidation !== 'VALIDEE_ENTREPRISE' && conv.statutValidation !== 'SIGNEE_FINALE') {
+              <button 
+                (click)="validerEntreprise()" 
+                [disabled]="processing()"
+                class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition disabled:opacity-50">
+                🏢 Valider les termes (Entreprise)
+              </button>
+            }
+
+            @if (isTuteur() && conv.statutValidation === 'VALIDEE_ENTREPRISE') {
+              <button 
+                (click)="validerTuteur()" 
+                [disabled]="processing()"
+                class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition disabled:opacity-50">
+                ✍️ Valider & Signer Officiellement
+              </button>
+            }
+
+            <button 
+              (click)="openConventionPdfPreview()"
+              class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+              <span>👁️ Aperçu de la Convention</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- MODULE ÉTAPE 4.2 : Journal d'Audit & Traçabilité -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+          <h2 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+            <span>📜 Journal d'Audit & Traçabilité</span>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-normal">
+              {{ auditLogs().length }} événement(s)
+            </span>
+          </h2>
+
+          <div class="relative pl-6 border-l border-slate-800 space-y-6">
+            @for (log of auditLogs(); track log.id) {
+              <div class="relative group">
+                <!-- Timeline Dot -->
+                <div class="absolute -left-[31px] top-1 w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-slate-900"></div>
+
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-white">{{ log.action }}</span>
+                    <span class="text-[10px] text-slate-500">{{ log.dateAction | date:'dd/MM HH:mm' }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-300 font-medium">{{ log.nomUtilisateur || 'Système' }}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded border font-semibold" [ngClass]="getRoleBadgeClass(log.roleUtilisateur)">
+                      {{ log.roleUtilisateur }}
+                    </span>
+                  </div>
+                  @if (log.details) {
+                    <p class="text-xs text-slate-400 bg-slate-950/60 p-2 rounded-lg border border-slate-800/80 mt-1">
+                      {{ log.details }}
+                    </p>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <p class="text-xs text-slate-500 italic">Aucun événement d'audit enregistré.</p>
+            }
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Integrated PDF Viewer Modal -->
+    <app-pdf-viewer 
+      [isOpen]="isPdfModalOpen()" 
+      [title]="pdfModalTitle()" 
+      [pdfBlob]="pdfModalBlob()"
+      [pdfUrl]="pdfModalUrl()"
+      (close)="closePdfModal()">
+    </app-pdf-viewer>
+
+  </div>
+}

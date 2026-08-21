@@ -1,0 +1,66 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+spring:
+  application:
+    name: unistage-backend
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/unistage_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&characterSetResults=UTF-8
+    username: root
+    password: ""
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-init-sql: "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        connection:
+          useUnicode: true
+          characterEncoding: UTF-8
+          charSet: UTF-8
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+  # Configuration Mail (mode simulation - pas de vrai serveur SMTP requis)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: noreply@univ-labe.edu.gn
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+    test-connection: false
+
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  access-token-expiration-ms: 900000     # 15 minutes
+  refresh-token-expiration-ms: 604800000 # 7 jours
+
+file:
+  upload-dir: ./uploads
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

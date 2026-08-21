@@ -1,0 +1,41 @@
+# ============================================================================
+# application-test.yml — Profil de test pour les tests d'intégration
+# Base de données H2 en mémoire pour isoler les tests du MySQL de prod
+# ============================================================================
+spring:
+  datasource:
+    url: jdbc:h2:mem:unistage_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+    hikari:
+      connection-init-sql: ""
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  # Désactiver Flyway pour les tests (schéma géré par Hibernate)
+  flyway:
+    enabled: false
+
+  mail:
+    host: localhost
+    port: 25
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+    test-connection: false
+
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  access-token-expiration-ms: 900000
+  refresh-token-expiration-ms: 604800000
+
+file:
+  upload-dir: ./test-uploads

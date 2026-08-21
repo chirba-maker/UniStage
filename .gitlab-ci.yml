@@ -1,0 +1,46 @@
+stages:
+  - test
+  - build-docker
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+# Cache Maven et npm
+cache:
+  paths:
+    - unistage-backend/.m2/repository
+    - unistage-frontend/node_modules/
+
+# -----------------------------------------------------------------------------
+# Tests Back-end
+# -----------------------------------------------------------------------------
+backend-test:
+  stage: test
+  image: maven:3.9.6-eclipse-temurin-17
+  script:
+    - cd unistage-backend
+    - mvn clean test -B
+
+# -----------------------------------------------------------------------------
+# Tests Front-end
+# -----------------------------------------------------------------------------
+frontend-test:
+  stage: test
+  image: node:20-alpine
+  script:
+    - cd unistage-frontend
+    - npm ci
+    - npm run test:ci
+
+# -----------------------------------------------------------------------------
+# Test de Build Docker
+# -----------------------------------------------------------------------------
+docker-build-check:
+  stage: build-docker
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  script:
+    - cp .env.example .env
+    - docker build -t unistage-backend:latest ./unistage-backend
+    - docker build -t unistage-frontend:latest ./unistage-frontend

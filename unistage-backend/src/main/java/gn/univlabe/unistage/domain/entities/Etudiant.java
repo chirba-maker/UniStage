@@ -1,0 +1,40 @@
+package gn.univlabe.unistage.domain.entities;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "etudiants")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Etudiant {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "utilisateur_id", referencedColumnName = "id", nullable = false, unique = true)
+    private User user;
+
+    @Column(nullable = false, unique = true, length = 50)
+    private String matricule;
+
+    @Column(nullable = false, length = 100)
+    private String nom;
+
+    @Column(nullable = false, length = 100)
+    private String prenom;
+
+    @Column(nullable = false, length = 100)
+    private String filiere;
+
+    @Column(nullable = false, length = 50)
+    private String niveau;
+
+    @Column(name = "cv_url")
+    private String cvUrl;
+}
