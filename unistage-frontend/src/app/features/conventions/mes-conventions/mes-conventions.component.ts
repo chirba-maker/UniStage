@@ -72,7 +72,7 @@ import { CountUpComponent } from '../../../shared/components/count-up/count-up.c
             <div class="card-main">
               <div class="info-group">
                 <div class="company-avatar">
-                  {{ conv.candidature?.offre?.nomEntreprise?.charAt(0) }}
+                  {{ (conv.candidature.offre.nomEntreprise || '🏢').charAt(0) }}
                 </div>
                 <div class="stage-info">
                   <h2 class="stage-title">{{ conv.candidature?.offre?.titre }}</h2>
