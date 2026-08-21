@@ -244,13 +244,13 @@ public class AuthService {
     }
 
     public AuthResponse refreshToken(RefreshTokenRequest request) {
-        if (!tokenProvider.validateToken(request.getRefreshToken())) {
-            throw new RuntimeException("Erreur: Refresh token expiré ou invalide.");
+        if (request == null || request.getRefreshToken() == null || !tokenProvider.validateToken(request.getRefreshToken())) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Erreur: Refresh token expiré ou invalide.");
         }
 
         String email = tokenProvider.getEmailFromToken(request.getRefreshToken());
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé."));
+                .orElseThrow(() -> new org.springframework.security.authentication.BadCredentialsException("Utilisateur non trouvé."));
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), null, null

@@ -4,7 +4,6 @@ import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 import { catchError, switchMap, throwError } from 'rxjs';
 
-// Track in-flight refresh attempts to avoid infinite loops
 let isRefreshing = false;
 
 export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
@@ -21,8 +20,16 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
 
-      // ── 401 Unauthorized ──────────────────────────────────────────────
-      if (error.status === 401 && !req.url.includes('/api/auth/login') && !req.url.includes('/api/auth/refresh-token')) {
+      // ── 1. Erreur sur les requêtes d'authentification (me / refresh-token) ──────────────
+      if (req.url.includes('/api/auth/me') || req.url.includes('/api/auth/refresh-token')) {
+        if (authService.isLoggedIn()) {
+          authService.logout();
+        }
+        return throwError(() => error);
+      }
+
+      // ── 2. 401 Unauthorized ──────────────────────────────────────────────
+      if (error.status === 401 && !req.url.includes('/api/auth/login')) {
         if (!isRefreshing) {
           isRefreshing = true;
           const refreshToken = localStorage.getItem('refresh_token');
@@ -30,7 +37,6 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
             return authService.refreshTokenRequest(refreshToken).pipe(
               switchMap(res => {
                 isRefreshing = false;
-                // Retry original request with new token
                 const retryReq = req.clone({
                   setHeaders: { Authorization: `Bearer ${res.accessToken}` }
                 });
@@ -41,7 +47,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
                 authService.logout();
                 toastService.warning(
                   'Session réinitialisée',
-                  'Le serveur a été redémarré. Vous avez été redirigé vers l\'accueil.'
+                  'Le serveur a été redémarré. Vous avez été déconnecté.'
                 );
                 return throwError(() => refreshErr);
               })
@@ -55,7 +61,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
         return throwError(() => error);
       }
 
-      // ── 403 Forbidden ─────────────────────────────────────────────────
+      // ── 3. 403 Forbidden ─────────────────────────────────────────────────
       if (error.status === 403 && !req.url.includes('/api/auth/login')) {
         if (authService.isLoggedIn()) {
           authService.logout();
@@ -63,7 +69,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
         }
       }
 
-      // ── 500+ Server Error ──────────────────────────────────────────────
+      // ── 4. 500+ Server Error ──────────────────────────────────────────────
       if (error.status >= 500) {
         toastService.error(
           'Erreur serveur',
@@ -71,11 +77,14 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
         );
       }
 
-      // ── Network / offline ─────────────────────────────────────────────
+      // ── 5. Network / offline ─────────────────────────────────────────────
       if (error.status === 0) {
+        if (authService.isLoggedIn()) {
+          authService.logout();
+        }
         toastService.error(
           'Connexion perdue',
-          'Impossible de contacter le serveur. Vérifiez votre connexion internet.'
+          'Le serveur est en cours de redémarrage ou inaccessible. Redirection vers l\'accueil.'
         );
       }
 
