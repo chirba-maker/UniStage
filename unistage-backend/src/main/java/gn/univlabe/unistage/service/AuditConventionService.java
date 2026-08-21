@@ -41,6 +41,14 @@ public class AuditConventionService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<AuditConventionDto> getAllAuditLogs() {
+        return auditConventionRepository.findAllByOrderByDateActionDesc()
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
     public AuditConventionDto mapToDto(AuditConvention audit) {
         return AuditConventionDto.builder()
                 .id(audit.getId())

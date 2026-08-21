@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface AuditConventionRepository extends JpaRepository<AuditConvention, Long> {
     List<AuditConvention> findByConventionIdOrderByDateActionAsc(Long conventionId);
+    List<AuditConvention> findAllByOrderByDateActionDesc();
 }

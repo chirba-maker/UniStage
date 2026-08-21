@@ -24,6 +24,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final gn.univlabe.unistage.service.AnalyticsService analyticsService;
+    private final gn.univlabe.unistage.service.AuditConventionService auditConventionService;
 
     @GetMapping("/stats")
     @Operation(summary = "Statistiques globales du tableau de bord d'administration")
@@ -35,6 +36,12 @@ public class AdminController {
     @Operation(summary = "Analytics & Statistiques poussées pour l'administration (Taux de placement, filières, entreprises)")
     public ResponseEntity<gn.univlabe.unistage.dto.AnalyticsDto> getAnalytics() {
         return ResponseEntity.ok(analyticsService.getAnalyticsDashboard());
+    }
+
+    @GetMapping("/audit-logs")
+    @Operation(summary = "Journal d'audit global et traçabilité de toutes les activités système")
+    public ResponseEntity<List<gn.univlabe.unistage.dto.AuditConventionDto>> getAllAuditLogs() {
+        return ResponseEntity.ok(auditConventionService.getAllAuditLogs());
     }
 
     @GetMapping("/entreprises")

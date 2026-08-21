@@ -49,4 +49,8 @@ export class AdminService {
   createTuteur(data: any): Observable<TuteurDto> {
     return this.http.post<TuteurDto>(`${this.apiUrl}/tuteurs`, data);
   }
+
+  getAuditLogs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/audit-logs`);
+  }
 }
