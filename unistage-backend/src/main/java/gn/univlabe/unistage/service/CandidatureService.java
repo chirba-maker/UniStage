@@ -1,5 +1,6 @@
 package gn.univlabe.unistage.service;
 
+import gn.univlabe.unistage.audit.AuditAction;
 import gn.univlabe.unistage.domain.entities.*;
 import gn.univlabe.unistage.domain.enums.StatutCandidatureEnum;
 import gn.univlabe.unistage.domain.enums.StatutConventionEnum;
@@ -30,6 +31,11 @@ public class CandidatureService {
     private final OffreStageService offreStageService;
 
     @Transactional
+    @AuditAction(
+        action = "CANDIDATURE_SOUMISE",
+        entite = "Candidature",
+        details = "Soumission d'une candidature par un étudiant pour une offre de stage"
+    )
     public CandidatureDto postuler(CreateCandidatureDto dto, MultipartFile cvFile, User studentUser) {
         Etudiant etudiant = etudiantRepository.findByUser(studentUser)
                 .orElseThrow(() -> new RuntimeException("Profil étudiant non trouvé."));
@@ -73,6 +79,11 @@ public class CandidatureService {
     }
 
     @Transactional
+    @AuditAction(
+        action = "CANDIDATURE_MISE_A_JOUR",
+        entite = "Candidature",
+        details = "Mise à jour du statut d'une candidature par l'entreprise (ENTRETIEN / RETENU / REFUS)"
+    )
     public CandidatureDto updateStatut(Long candidatureId, StatutCandidatureEnum newStatut, User entrepriseUser) {
         Entreprise entreprise = entrepriseRepository.findByUser(entrepriseUser)
                 .orElseThrow(() -> new RuntimeException("Profil entreprise non trouvé."));

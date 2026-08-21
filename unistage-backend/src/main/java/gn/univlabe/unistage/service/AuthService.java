@@ -1,5 +1,6 @@
 package gn.univlabe.unistage.service;
 
+import gn.univlabe.unistage.audit.AuditAction;
 import gn.univlabe.unistage.domain.entities.Entreprise;
 import gn.univlabe.unistage.domain.entities.Etudiant;
 import gn.univlabe.unistage.domain.entities.Tuteur;
@@ -33,6 +34,11 @@ public class AuthService {
     private final NotificationService notificationService;
 
     @Transactional
+    @AuditAction(
+        action = "INSCRIPTION_ETUDIANT",
+        entite = "User",
+        details = "Inscription d'un nouvel étudiant sur la plateforme UniStage"
+    )
     public AuthResponse registerEtudiant(RegisterStudentDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("Erreur: Un utilisateur existe déjà avec cet e-mail.");
@@ -128,6 +134,11 @@ public class AuthService {
                 .build();
     }
 
+    @AuditAction(
+        action = "CONNEXION",
+        entite = "User",
+        details = "Connexion d'un utilisateur à la plateforme UniStage"
+    )
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())

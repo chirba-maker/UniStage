@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
-import { AdminService, EntrepriseDto } from '../../../core/services/admin.service';
+import { forkJoin, interval, Subscription } from 'rxjs';
+import { AdminService, EntrepriseDto, SystemAuditLogDto } from '../../../core/services/admin.service';
 import { OffreService } from '../../../core/services/offre.service';
 import { ConventionService } from '../../../core/services/convention.service';
 import { AnalyticsService } from '../../../core/services/analytics.service';
@@ -204,7 +204,8 @@ Chart.register(...registerables);
           <button class="nav-link rounded-3 px-4 fw-semibold d-flex align-items-center gap-2" [class.active]="tab === 'audit'" (click)="setTab('audit')" style="transition: all 0.25s ease; padding-top: 10px; padding-bottom: 10px;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Journal d'Audit
-            <span class="badge rounded-pill ms-1" [ngClass]="tab === 'audit' ? 'bg-white text-primary' : 'bg-primary-subtle text-primary'">{{ auditLogs().length }}</span>
+            <span class="badge rounded-pill ms-1" [ngClass]="tab === 'audit' ? 'bg-white text-primary' : 'bg-primary-subtle text-primary'">{{ systemAuditLogs().length }}</span>
+            <span *ngIf="auditAutoRefresh" class="audit-live-badge">⬤ LIVE</span>
           </button>
         </li>
       </ul>
@@ -480,44 +481,120 @@ Chart.register(...registerables);
         </div>
       </div>
 
-      <!-- ── TAB 5 : JOURNAL D'AUDIT TAB ── -->
+      <!-- ── TAB 5 : JOURNAL D'AUDIT SYSTÈME GLOBAL (AOP) ── -->
       <div *ngIf="tab === 'audit'">
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h4 class="fw-bold mb-1">📜 Journal d'Audit & Traçabilité Système</h4>
-              <p class="text-muted small mb-0">Historique complet de toutes les actions, validations et signatures du système</p>
-            </div>
-            <span class="badge bg-dark text-white px-3 py-2 rounded-pill">{{ auditLogs().length }} événement(s)</span>
-          </div>
 
+        <!-- Header + Controls -->
+        <div class="card border-0 shadow-sm rounded-4 mb-3 p-3 bg-white">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <h4 class="fw-bold mb-1">🔍 Journal d'Audit Système — Temps Réel</h4>
+              <p class="text-muted small mb-0">
+                Toutes les actions utilisateurs capturées automatiquement via Spring AOP
+                <span class="badge bg-success-subtle text-success ms-2">
+                  <span class="audit-live-dot"></span> Capteur AOP actif
+                </span>
+              </p>
+            </div>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+              <!-- Filtres rapides -->
+              <select class="form-select form-select-sm rounded-3" style="width: auto;" [(ngModel)]="auditFilterRole" (change)="applyAuditFilter()">
+                <option value="">Tous les rôles</option>
+                <option value="ROLE_ADMIN">Admin</option>
+                <option value="ROLE_ETUDIANT">Étudiant</option>
+                <option value="ROLE_ENTREPRISE">Entreprise</option>
+                <option value="ROLE_TUTEUR">Tuteur</option>
+              </select>
+              <select class="form-select form-select-sm rounded-3" style="width: auto;" [(ngModel)]="auditFilterStatut" (change)="applyAuditFilter()">
+                <option value="">Tous les statuts</option>
+                <option value="SUCCESS">✅ SUCCESS</option>
+                <option value="ERROR">❌ ERROR</option>
+              </select>
+              <!-- Toggle auto-refresh -->
+              <button class="btn btn-sm rounded-3 fw-semibold"
+                      [ngClass]="auditAutoRefresh ? 'btn-success' : 'btn-outline-secondary'"
+                      (click)="toggleAuditAutoRefresh()">
+                {{ auditAutoRefresh ? '⏸ Pause' : '▶ Auto-refresh (10s)' }}
+              </button>
+              <!-- Count badge -->
+              <span class="badge bg-dark text-white px-3 py-2 rounded-pill">{{ filteredAuditLogs().length }} événement(s)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card border-0 shadow-sm rounded-4 p-0 bg-white overflow-hidden">
           <div class="table-responsive">
-            <table class="table align-middle table-hover">
-              <thead class="table-light">
+            <table class="table align-middle table-hover mb-0">
+              <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
                 <tr>
-                  <th>Date & Heure</th>
-                  <th>Utilisateur</th>
-                  <th>Rôle</th>
-                  <th>Action</th>
-                  <th>Détails</th>
-                  <th>Convention</th>
+                  <th class="px-4 py-3 text-muted small fw-bold text-uppercase">Date &amp; Heure</th>
+                  <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Utilisateur</th>
+                  <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Rôle</th>
+                  <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Action</th>
+                  <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Entité</th>
+                  <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Détails</th>
+                  <th class="px-3 py-3 text-muted small fw-bold text-uppercase">IP</th>
+                  <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Statut</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let log of auditLogs()">
-                  <td class="small text-muted font-monospace">{{ log.dateAction | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-                  <td class="fw-bold text-dark">{{ log.nomUtilisateur || 'Système' }}</td>
-                  <td>
-                    <span class="badge px-2.5 py-1.5 rounded-pill" [ngClass]="getRoleBadgeClass(log.roleUtilisateur)">
-                      {{ log.roleUtilisateur }}
+                <tr *ngFor="let log of filteredAuditLogs()" class="audit-row"
+                    [class.audit-row-error]="log.statut === 'ERROR'">
+                  <!-- Date -->
+                  <td class="px-4 py-3">
+                    <div class="small font-monospace text-muted">{{ log.dateAction | date:'dd/MM/yy' }}</div>
+                    <div class="small font-monospace fw-bold text-dark">{{ log.dateAction | date:'HH:mm:ss' }}</div>
+                  </td>
+                  <!-- Utilisateur -->
+                  <td class="px-3 py-3">
+                    <div class="fw-bold text-dark small">{{ log.nomUtilisateur || 'Système' }}</div>
+                    <div class="text-muted" style="font-size:0.72rem;">{{ log.emailUtilisateur }}</div>
+                  </td>
+                  <!-- Rôle -->
+                  <td class="px-3 py-3">
+                    <span class="badge px-2 py-1 rounded-pill small" [ngClass]="getRoleBadgeClass(log.roleUtilisateur)">
+                      {{ getRoleLabel(log.roleUtilisateur) }}
                     </span>
                   </td>
-                  <td><span class="badge bg-dark-subtle text-dark border">{{ log.action }}</span></td>
-                  <td class="small text-secondary">{{ log.details }}</td>
-                  <td><span class="badge bg-primary-subtle text-primary">Conv #{{ log.conventionId }}</span></td>
+                  <!-- Action -->
+                  <td class="px-3 py-3">
+                    <span class="badge px-2 py-1 rounded-2 small fw-semibold" [ngClass]="getActionBadgeClass(log.action)"
+                          style="font-size: 0.7rem; letter-spacing: 0.02em;">
+                      {{ log.action }}
+                    </span>
+                  </td>
+                  <!-- Entité -->
+                  <td class="px-3 py-3">
+                    <span *ngIf="log.entite" class="text-primary small fw-semibold">{{ log.entite }}</span>
+                    <span *ngIf="log.entiteId" class="text-muted small ms-1">#{{ log.entiteId }}</span>
+                    <span *ngIf="!log.entite" class="text-muted small">—</span>
+                  </td>
+                  <!-- Détails -->
+                  <td class="px-3 py-3" style="max-width: 260px;">
+                    <span class="text-secondary small" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                          [title]="log.details">{{ log.details }}</span>
+                  </td>
+                  <!-- IP -->
+                  <td class="px-3 py-3">
+                    <span class="text-muted small font-monospace">{{ log.ipAdresse || '—' }}</span>
+                  </td>
+                  <!-- Statut -->
+                  <td class="px-3 py-3">
+                    <span class="badge rounded-pill px-2 py-1"
+                          [ngClass]="log.statut === 'SUCCESS' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                      {{ log.statut === 'SUCCESS' ? '✅' : '❌' }} {{ log.statut }}
+                    </span>
+                  </td>
                 </tr>
-                <tr *ngIf="auditLogs().length === 0">
-                  <td colspan="6" class="text-center py-4 text-muted">Aucun log d'audit enregistré.</td>
+                <tr *ngIf="filteredAuditLogs().length === 0">
+                  <td colspan="8" class="text-center py-5">
+                    <div class="text-muted">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mb-3 opacity-50"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      <p class="fw-semibold mb-1">Aucune action enregistrée</p>
+                      <small>Effectuez une action (Publier, Rejeter, Affecter...) pour voir les logs apparaître ici.</small>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -766,7 +843,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
   offres = signal<OffreStage[]>([]);
   conventions = signal<ConventionStage[]>([]);
   tuteurs = signal<TuteurDto[]>([]);
-  auditLogs = signal<any[]>([]);
+  auditLogs = signal<any[]>([]);        // legacy convention audit logs
+  systemAuditLogs = signal<SystemAuditLogDto[]>([]);  // system-wide AOP audit logs
+  filteredAuditLogs = signal<SystemAuditLogDto[]>([]); // after filter
+
+  auditFilterRole = '';
+  auditFilterStatut = '';
+  auditAutoRefresh = false;
+  private auditRefreshSubscription?: Subscription;
 
   tab: 'analytics' | 'entreprises' | 'offres' | 'conventions' | 'audit' = 'analytics';
   statutOffreEnum = StatutOffreEnum;
@@ -794,6 +878,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
 
   ngOnDestroy(): void {
     this.destroyCharts();
+    this.stopAuditAutoRefresh();
   }
 
   setTab(newTab: 'analytics' | 'entreprises' | 'offres' | 'conventions' | 'audit'): void {
@@ -812,9 +897,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       conventions: this.conventionService.getAllConventionsAdmin(),
       tuteurs: this.adminService.getTuteurs(),
       analytics: this.analyticsService.getAnalytics(),
-      auditLogs: this.adminService.getAuditLogs()
+      auditLogs: this.adminService.getAuditLogs(),
+      systemAuditLogs: this.adminService.getSystemAuditLogs()
     }).subscribe({
-      next: ({ stats, entreprises, offres, conventions, tuteurs, analytics, auditLogs }) => {
+      next: ({ stats, entreprises, offres, conventions, tuteurs, analytics, auditLogs, systemAuditLogs }) => {
         this.stats.set(stats);
         this.entreprises.set(entreprises);
         this.offres.set(offres);
@@ -822,6 +908,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
         this.tuteurs.set(tuteurs);
         this.analyticsData.set(analytics);
         this.auditLogs.set(auditLogs);
+        this.systemAuditLogs.set(systemAuditLogs);
+        this.applyAuditFilter();
         this.loading.set(false);
         if (this.tab === 'analytics') {
           setTimeout(() => this.renderCharts(), 100);
@@ -834,6 +922,39 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     });
   }
 
+  /** Recharge uniquement le journal d'audit système (léger, pour auto-refresh) */
+  refreshAuditLogs(): void {
+    this.adminService.getSystemAuditLogs().subscribe(logs => {
+      this.systemAuditLogs.set(logs);
+      this.applyAuditFilter();
+    });
+  }
+
+  applyAuditFilter(): void {
+    let logs = this.systemAuditLogs();
+    if (this.auditFilterRole) {
+      logs = logs.filter(l => l.roleUtilisateur === this.auditFilterRole);
+    }
+    if (this.auditFilterStatut) {
+      logs = logs.filter(l => l.statut === this.auditFilterStatut);
+    }
+    this.filteredAuditLogs.set(logs);
+  }
+
+  toggleAuditAutoRefresh(): void {
+    this.auditAutoRefresh = !this.auditAutoRefresh;
+    if (this.auditAutoRefresh) {
+      this.auditRefreshSubscription = interval(10000).subscribe(() => this.refreshAuditLogs());
+    } else {
+      this.stopAuditAutoRefresh();
+    }
+  }
+
+  private stopAuditAutoRefresh(): void {
+    this.auditRefreshSubscription?.unsubscribe();
+    this.auditAutoRefresh = false;
+  }
+
   getRoleBadgeClass(role?: string): string {
     switch (role) {
       case 'ROLE_ADMIN': return 'bg-danger text-white';
@@ -842,6 +963,33 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       case 'ROLE_TUTEUR': return 'bg-success text-white';
       default: return 'bg-secondary text-white';
     }
+  }
+
+  getRoleLabel(role?: string): string {
+    switch (role) {
+      case 'ROLE_ADMIN': return 'Admin';
+      case 'ROLE_ETUDIANT': return 'Étudiant';
+      case 'ROLE_ENTREPRISE': return 'Entreprise';
+      case 'ROLE_TUTEUR': return 'Tuteur';
+      default: return role || 'Système';
+    }
+  }
+
+  getActionBadgeClass(action?: string): string {
+    if (!action) return 'bg-secondary-subtle text-secondary';
+    // Connexions
+    if (action.includes('CONNEXION') || action.includes('INSCRIPTION')) return 'bg-info-subtle text-info border border-info-subtle';
+    // Offres
+    if (action.includes('OFFRE')) return 'bg-primary-subtle text-primary border border-primary-subtle';
+    // Candidatures
+    if (action.includes('CANDIDATURE')) return 'bg-warning-subtle text-warning border border-warning-subtle';
+    // Conventions
+    if (action.includes('CONVENTION') || action.includes('TUTEUR') || action.includes('SIGNATURE')) return 'bg-success-subtle text-success border border-success-subtle';
+    // Entreprises/Validation
+    if (action.includes('ENTREPRISE') || action.includes('VALIDE')) return 'bg-violet-subtle text-purple border border-purple-subtle';
+    // Erreurs
+    if (action.includes('ERREUR') || action.includes('ERROR')) return 'bg-danger-subtle text-danger border border-danger-subtle';
+    return 'bg-dark-subtle text-dark border';
   }
 
   getSignedConventionsCount(): number {

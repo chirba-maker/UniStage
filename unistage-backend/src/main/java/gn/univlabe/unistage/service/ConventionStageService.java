@@ -1,5 +1,6 @@
 package gn.univlabe.unistage.service;
 
+import gn.univlabe.unistage.audit.AuditAction;
 import gn.univlabe.unistage.domain.entities.*;
 import gn.univlabe.unistage.domain.enums.StatutConventionEnum;
 import gn.univlabe.unistage.dto.ConventionStageDto;
@@ -31,6 +32,11 @@ public class ConventionStageService {
     private final AuditConventionService auditConventionService;
 
     @Transactional
+    @AuditAction(
+        action = "CONVENTION_SOUMISE",
+        entite = "ConventionStage",
+        details = "L'étudiant a complété les termes de la convention (dates, missions) et l'a soumise pour validation tripartite"
+    )
     public ConventionStageDto updateConventionDetails(Long conventionId, UpdateConventionDto dto) {
         ConventionStage convention = conventionStageRepository.findById(conventionId)
                 .orElseThrow(() -> new RuntimeException("Convention de stage non trouvée."));
@@ -58,6 +64,11 @@ public class ConventionStageService {
     }
 
     @Transactional
+    @AuditAction(
+        action = "CONVENTION_VALIDEE_ENTREPRISE",
+        entite = "ConventionStage",
+        details = "L'entreprise a validé et signé électroniquement la convention de stage"
+    )
     public ConventionStageDto validerParEntreprise(Long conventionId, User entrepriseUser) {
         Entreprise entreprise = entrepriseRepository.findByUser(entrepriseUser)
                 .orElseThrow(() -> new RuntimeException("Profil entreprise non trouvé."));
@@ -97,6 +108,11 @@ public class ConventionStageService {
     }
 
     @Transactional
+    @AuditAction(
+        action = "TUTEUR_AFFECTE",
+        entite = "ConventionStage",
+        details = "L'administration a affecté un tuteur académique à la convention de stage"
+    )
     public ConventionStageDto assignerTuteur(Long conventionId, Long tuteurId) {
         ConventionStage convention = conventionStageRepository.findById(conventionId)
                 .orElseThrow(() -> new RuntimeException("Convention non trouvée."));
@@ -127,6 +143,11 @@ public class ConventionStageService {
     }
 
     @Transactional
+    @AuditAction(
+        action = "CONVENTION_SIGNEE_FINALE",
+        entite = "ConventionStage",
+        details = "Le tuteur académique a validé et signé la convention — PDF officiel généré et envoyé par email"
+    )
     public ConventionStageDto validerParTuteur(Long conventionId, User tuteurUser) {
         Tuteur tuteur = tuteurRepository.findByUser(tuteurUser)
                 .orElseThrow(() -> new RuntimeException("Profil tuteur non trouvé."));

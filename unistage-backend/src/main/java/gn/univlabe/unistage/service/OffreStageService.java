@@ -1,5 +1,6 @@
 package gn.univlabe.unistage.service;
 
+import gn.univlabe.unistage.audit.AuditAction;
 import gn.univlabe.unistage.domain.entities.Entreprise;
 import gn.univlabe.unistage.domain.entities.OffreStage;
 import gn.univlabe.unistage.domain.entities.User;
@@ -26,6 +27,11 @@ public class OffreStageService {
     private final NotificationService notificationService;
 
     @Transactional
+    @AuditAction(
+        action = "OFFRE_CREEE",
+        entite = "OffreStage",
+        details = "Création d'une nouvelle offre de stage par une entreprise partenaire (en attente de modération admin)"
+    )
     public OffreStageDto createOffre(CreateOffreDto dto, User entrepriseUser) {
         Entreprise entreprise = entrepriseRepository.findByUser(entrepriseUser)
                 .orElseThrow(() -> new RuntimeException("Profil entreprise non trouvé"));
@@ -64,6 +70,11 @@ public class OffreStageService {
     }
 
     @Transactional
+    @AuditAction(
+        action = "OFFRE_MODEREE",
+        entite = "OffreStage",
+        details = "Décision de modération administrative sur une offre de stage (Publier / Rejeter)"
+    )
     public OffreStageDto validerOffre(Long id, StatutOffreEnum newStatut) {
         OffreStage offre = offreStageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Offre de stage non trouvée"));

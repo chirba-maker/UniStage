@@ -16,6 +16,23 @@ export interface EntrepriseDto {
   estValidee: boolean;
 }
 
+/** Modèle du journal d'audit système (alimenté par @AuditAction AOP) */
+export interface SystemAuditLogDto {
+  id: number;
+  utilisateurId: number;
+  nomUtilisateur: string;
+  emailUtilisateur: string;
+  roleUtilisateur: string;
+  action: string;
+  details: string;
+  entite: string;
+  entiteId: number;
+  ipAdresse: string;
+  dateAction: string;
+  statut: 'SUCCESS' | 'ERROR';
+  messageErreur?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -50,7 +67,18 @@ export class AdminService {
     return this.http.post<TuteurDto>(`${this.apiUrl}/tuteurs`, data);
   }
 
+  /** Journal d'audit système global (toutes les actions, temps réel) */
+  getSystemAuditLogs(): Observable<SystemAuditLogDto[]> {
+    return this.http.get<SystemAuditLogDto[]>(`${this.apiUrl}/system-audit-logs`);
+  }
+
+  /** Journal d'audit spécifique aux conventions (legacy) */
   getAuditLogs(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/audit-logs`);
+  }
+
+  /** Résumé des actions récentes pour le widget dashboard */
+  getAuditSummary(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/audit-summary`);
   }
 }

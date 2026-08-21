@@ -1,5 +1,6 @@
 package gn.univlabe.unistage.service;
 
+import gn.univlabe.unistage.audit.AuditAction;
 import gn.univlabe.unistage.domain.entities.*;
 import gn.univlabe.unistage.domain.enums.RoleEnum;
 import gn.univlabe.unistage.dto.*;
@@ -28,6 +29,11 @@ public class AdminService {
     private final NotificationService notificationService;
 
     @Transactional
+    @AuditAction(
+        action = "ENTREPRISE_VALIDEE",
+        entite = "Entreprise",
+        details = "Décision administrative de validation ou de désactivation d'un compte entreprise partenaire"
+    )
     public EntrepriseDto validerEntreprise(Long entrepriseId, Boolean estValidee) {
         Entreprise entreprise = entrepriseRepository.findById(entrepriseId)
                 .orElseThrow(() -> new RuntimeException("Entreprise non trouvée"));
@@ -60,6 +66,11 @@ public class AdminService {
     }
 
     @Transactional
+    @AuditAction(
+        action = "TUTEUR_CREE",
+        entite = "Tuteur",
+        details = "Création d'un nouveau compte tuteur académique par l'administration"
+    )
     public TuteurDto createTuteur(String email, String password, String nom, String prenom, String departement) {
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Un utilisateur existe déjà avec cet e-mail.");
