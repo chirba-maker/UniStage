@@ -45,6 +45,22 @@ export class AuthService {
     });
   }
 
+  /**
+   * Vérifie la validité de la session auprès du backend au démarrage de l'application.
+   * Si le backend a été redémarré ou si le token est invalide, déconnecte et redirige vers l'accueil (/).
+   */
+  validateSessionOnStart(): void {
+    if (!this.isLoggedIn()) {
+      return;
+    }
+    this.fetchCurrentUserProfile().subscribe({
+      error: () => {
+        console.warn('Backend redémarré ou token invalide. Redirection vers la page d\'accueil.');
+        this.logout();
+      }
+    });
+  }
+
   getToken(): string | null {
     return localStorage.getItem('access_token');
   }

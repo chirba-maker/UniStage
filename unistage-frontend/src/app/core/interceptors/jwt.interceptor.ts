@@ -40,26 +40,27 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
                 isRefreshing = false;
                 authService.logout();
                 toastService.warning(
-                  'Session expirée',
-                  'Votre session a expiré. Veuillez vous reconnecter.'
+                  'Session réinitialisée',
+                  'Le serveur a été redémarré. Vous avez été redirigé vers l\'accueil.'
                 );
                 return throwError(() => refreshErr);
               })
             );
           } else {
             isRefreshing = false;
-            if (authService.isLoggedIn()) {
-              authService.logout();
-              toastService.warning('Session expirée', 'Veuillez vous reconnecter.');
-            }
+            authService.logout();
+            toastService.warning('Session réinitialisée', 'Veuillez vous reconnecter.');
           }
         }
         return throwError(() => error);
       }
 
       // ── 403 Forbidden ─────────────────────────────────────────────────
-      if (error.status === 403) {
-        toastService.error('Accès refusé', 'Vous n\'avez pas les droits pour effectuer cette action.');
+      if (error.status === 403 && !req.url.includes('/api/auth/login')) {
+        if (authService.isLoggedIn()) {
+          authService.logout();
+          toastService.warning('Accès réinitialisé', 'Le serveur a été redémarré. Redirection vers l\'accueil.');
+        }
       }
 
       // ── 500+ Server Error ──────────────────────────────────────────────

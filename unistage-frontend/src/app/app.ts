@@ -3,6 +3,7 @@ import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { ToastComponent } from './shared/components/toast/toast.component';
+import { AuthService } from './core/services/auth.service';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -26,8 +27,12 @@ import { filter } from 'rxjs/operators';
 })
 export class App implements OnInit {
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   ngOnInit(): void {
+    // Si le backend a été redémarré ou la session est invalide, déconnecter et rediriger vers l'accueil (/)
+    this.authService.validateSessionOnStart();
+
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
