@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterStudentDto, RegisterEntrepriseDto, RoleEnum, User } from '../models/user.model';
+import { AuthResponse, LoginRequest, RegisterStudentDto, RegisterEntrepriseDto, RegisterTuteurDto, RoleEnum, User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +24,12 @@ export class AuthService {
 
   registerEntreprise(dto: RegisterEntrepriseDto): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register/entreprise`, dto).pipe(
+      tap(res => this.handleAuthSuccess(res))
+    );
+  }
+
+  registerTuteur(dto: RegisterTuteurDto): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register/tuteur`, dto).pipe(
       tap(res => this.handleAuthSuccess(res))
     );
   }

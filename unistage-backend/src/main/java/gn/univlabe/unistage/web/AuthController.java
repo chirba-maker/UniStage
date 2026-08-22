@@ -37,6 +37,13 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping("/register/tuteur")
+    @Operation(summary = "Inscription d'un compte Tuteur Academique")
+    public ResponseEntity<AuthResponse> registerTuteur(@Valid @RequestBody RegisterTuteurDto dto) {
+        AuthResponse response = authService.registerTuteur(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @PostMapping("/login")
     @Operation(summary = "Connexion utilisateur (Étudiant, Entreprise, Tuteur, Admin)")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {

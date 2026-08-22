@@ -473,6 +473,7 @@ import { switchMap, filter } from 'rxjs/operators';
       inset: 0;
       top: 64px;
       background: rgba(15, 23, 42, 0.4);
+      -webkit-backdrop-filter: blur(4px);
       backdrop-filter: blur(4px);
       z-index: 98;
     }

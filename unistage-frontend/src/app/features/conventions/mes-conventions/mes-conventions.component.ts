@@ -75,8 +75,8 @@ import { CountUpComponent } from '../../../shared/components/count-up/count-up.c
                   {{ (conv.candidature.offre.nomEntreprise || '🏢').charAt(0) }}
                 </div>
                 <div class="stage-info">
-                  <h2 class="stage-title">{{ conv.candidature?.offre?.titre }}</h2>
-                  <p class="company-name">🏢 {{ conv.candidature?.offre?.nomEntreprise }} • 📍 {{ conv.candidature?.offre?.lieu }}</p>
+                  <h2 class="stage-title">{{ conv.candidature.offre.titre }}</h2>
+                  <p class="company-name">🏢 {{ conv.candidature.offre.nomEntreprise }} • 📍 {{ conv.candidature.offre.lieu }}</p>
                 </div>
               </div>
 

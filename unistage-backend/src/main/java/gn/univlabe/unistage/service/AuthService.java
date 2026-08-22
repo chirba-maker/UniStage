@@ -134,6 +134,59 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
+    @AuditAction(
+        action = "INSCRIPTION_TUTEUR",
+        entite = "User",
+        details = "Inscription d'un nouveau tuteur academique sur la plateforme UniStage"
+    )
+    public AuthResponse registerTuteur(RegisterTuteurDto dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new RuntimeException("Erreur: Un utilisateur existe deja avec cet e-mail.");
+        }
+
+        User user = User.builder()
+                .email(dto.getEmail())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .role(RoleEnum.ROLE_TUTEUR)
+                .actif(true)
+                .build();
+
+        user = userRepository.save(user);
+
+        Tuteur tuteur = Tuteur.builder()
+                .user(user)
+                .nom(dto.getNom())
+                .prenom(dto.getPrenom())
+                .departement(dto.getDepartement())
+                .build();
+
+        tuteurRepository.save(tuteur);
+
+        notificationService.notifyAllAdmins(
+                "Nouveau tuteur inscrit",
+                "Le tuteur " + tuteur.getPrenom() + " " + tuteur.getNom() +
+                " (" + tuteur.getDepartement() + ") vient de s'inscrire sur UniStage."
+        );
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
+        );
+
+        String accessToken = tokenProvider.generateAccessToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken(user.getEmail());
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .userId(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .nomComplet(tuteur.getPrenom() + " " + tuteur.getNom())
+                .departement(tuteur.getDepartement())
+                .build();
+    }
+
     @AuditAction(
         action = "CONNEXION",
         entite = "User",

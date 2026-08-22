@@ -32,8 +32,8 @@ import { OffreStage } from '../../../core/models/offre.model';
 
           <!-- Main Title with high contrast gradient -->
           <h1 class="hero-title">
-            Propulsez votre avenir avec le <br class="d-none d-md-block">
-            <span class="title-highlight">stage parfait en Guinée</span>
+            Propulsez votre avenir avec
+            <span class="title-highlight">le stage parfait en Guinée</span>
           </h1>
 
           <!-- Subtitle -->
@@ -293,7 +293,7 @@ import { OffreStage } from '../../../core/models/offre.model';
     .hero-section {
       position: relative;
       background: radial-gradient(circle at 50% 0%, #1e3a8a 0%, #0f172a 75%, #020617 100%);
-      padding: 5.5rem 1.5rem 4.5rem;
+      padding: 2.2rem 1.5rem 4rem;
       overflow: hidden;
       color: #fff;
     }
@@ -344,9 +344,9 @@ import { OffreStage } from '../../../core/models/offre.model';
       color: #93c5fd;
       background: rgba(30, 58, 138, 0.45);
       border: 1.5px solid rgba(147, 197, 253, 0.3);
-      padding: 0.4rem 1.1rem;
+      padding: 0.35rem 1.1rem;
       border-radius: 999px;
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.25rem;
       backdrop-filter: blur(10px);
       letter-spacing: 0.02em;
     }

@@ -138,6 +138,14 @@ import { AuthService } from '../../../core/services/auth.service';
                 <small>Recruter des stagiaires</small>
               </div>
             </a>
+
+            <a routerLink="/auth/register-tuteur" class="alt-btn-role alt-purple">
+              <span class="role-icon">🎓</span>
+              <div class="role-text">
+                <strong>Espace Tuteur / Enseignant</strong>
+                <small>Supervision académique</small>
+              </div>
+            </a>
           </div>
 
         </div>
@@ -598,6 +606,17 @@ import { AuthService } from '../../../core/services/auth.service';
     .alt-green:hover {
       background: #d1fae5;
       border-color: #6ee7b7;
+      transform: translateY(-1px);
+    }
+    .alt-purple {
+      color: #6d28d9;
+      background: #f5f3ff;
+      border-color: #ddd6fe;
+      grid-column: span 2;
+    }
+    .alt-purple:hover {
+      background: #ede9fe;
+      border-color: #c4b5fd;
       transform: translateY(-1px);
     }
 

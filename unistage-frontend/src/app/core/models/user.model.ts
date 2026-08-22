@@ -60,3 +60,20 @@ export interface RegisterEntrepriseDto {
   adresse: string;
   telephone: string;
 }
+
+export interface RegisterTuteurDto {
+  email: string;
+  password: string;
+  nom: string;
+  prenom: string;
+  departement: string;
+  matriculeEnseignant?: string;
+}
+
+export interface TuteurSummary {
+  id: number;
+  nom: string;
+  prenom: string;
+  departement: string;
+  email: string;
+}

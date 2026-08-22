@@ -22,6 +22,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register-entreprise/register-entreprise.component').then(m => m.RegisterEntrepriseComponent)
   },
   {
+    path: 'auth/register-tuteur',
+    loadComponent: () => import('./features/auth/register-tuteur/register-tuteur.component').then(m => m.RegisterTuteurComponent)
+  },
+  {
     path: 'offres',
     loadComponent: () => import('./features/offres/offres-list/offres-list.component').then(m => m.OffresListComponent)
   },

@@ -24,15 +24,38 @@ export class PdfViewerComponent implements OnChanges {
   readonly icons = { X, Download, ExternalLink, Printer, FileText };
 
   ngOnChanges(changes: SimpleChanges): void {
+    // Recompute the URL when blob changes
     if (changes['pdfBlob'] && this.pdfBlob) {
       if (this.rawBlobUrl) {
         URL.revokeObjectURL(this.rawBlobUrl);
       }
       this.rawBlobUrl = URL.createObjectURL(this.pdfBlob);
       this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawBlobUrl);
-    } else if (changes['pdfUrl'] && this.pdfUrl) {
+    }
+
+    // Recompute the URL when pdfUrl changes
+    if (changes['pdfUrl'] && this.pdfUrl) {
       this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfUrl);
       this.rawBlobUrl = this.pdfUrl;
+    }
+
+    // When the modal opens, make sure safeUrl is set if we already have a source
+    if (changes['isOpen'] && this.isOpen) {
+      if (this.pdfBlob && !this.safeUrl) {
+        if (this.rawBlobUrl) {
+          URL.revokeObjectURL(this.rawBlobUrl);
+        }
+        this.rawBlobUrl = URL.createObjectURL(this.pdfBlob);
+        this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawBlobUrl);
+      } else if (this.pdfUrl && !this.safeUrl) {
+        this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfUrl);
+        this.rawBlobUrl = this.pdfUrl;
+      }
+    }
+
+    // When modal closes, reset safeUrl so it refreshes on next open
+    if (changes['isOpen'] && !this.isOpen) {
+      this.safeUrl = null;
     }
   }
 
@@ -54,3 +77,4 @@ export class PdfViewerComponent implements OnChanges {
     }
   }
 }
+
